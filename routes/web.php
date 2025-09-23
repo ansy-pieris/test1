@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\StaffController as AdminStaffController;
+use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 use App\Livewire\Shop\CheckoutPage;
 
 /*
@@ -93,10 +94,19 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->group(function () {
-    Route::view('/dashboard', 'staff.dashboard')->name('dashboard');
-    Route::view('/products', 'staff.products')->name('products');
-    Route::view('/orders', 'staff.orders')->name('orders');
-    Route::view('/profile', 'staff.profile')->name('profile');
+    Route::get('/dashboard', [StaffDashboardController::class, 'index'])->name('dashboard');
+    
+    // Products Management (shared with admin)
+    Route::get('/products', [AdminProductController::class, 'index'])->name('products');
+    Route::post('/products/store', [AdminProductController::class, 'store'])->name('products.store');
+    Route::post('/products/update', [AdminProductController::class, 'update'])->name('products.update');
+    Route::post('/products/destroy', [AdminProductController::class, 'destroy'])->name('products.destroy');
+    
+    // Orders Management (shared with admin)
+    Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders');
+    Route::post('/orders/update-status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
 });
 
 /*
@@ -125,5 +135,5 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Orders Management
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders');
     Route::post('/orders/update-status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
-    Route::view('/profile', 'admin.profile')->name('profile');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
 });

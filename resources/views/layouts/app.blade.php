@@ -22,10 +22,30 @@
   
   {{-- Additional Styles --}}
   @stack('styles')
+  
+  {{-- Fix for any stray navbar elements --}}
+  <style>
+    /* Ensure no stray text appears outside navbar */
+    body > *:not(nav):not(main):not(footer) {
+      display: none !important;
+    }
+    
+    /* Force clean navbar display */
+    nav {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      z-index: 9999 !important;
+    }
+    
+    /* Hide any duplicate or overlapping elements */
+    nav + nav {
+      display: none !important;
+    }
+  </style>
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col">
-  @include('partials.navbars.navbar-customer')
-
   {{-- Role-specific navbars --}}
   @auth
       @if(auth()->user()->isAdmin())

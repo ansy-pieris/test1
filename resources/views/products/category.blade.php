@@ -60,16 +60,16 @@
           <div class="bg-neutral-900 group rounded-2xl overflow-hidden shadow-xl 
                       transition-all duration-700 ease-in-out hover:bg-white hover:scale-105">
 
-            <div class="w-full h-80 overflow-hidden">
+            <div class="w-full h-80 overflow-hidden bg-white">
               @php
                 $img = $product->image ?: '';
                 $src = Str::startsWith($img, ['http', 'storage/', '/images/'])
                           ? asset(ltrim($img, '/'))
-                          : asset('storage/'.$img);
+                          : asset('storage/products/'.$img);
               @endphp
               <img src="{{ $src }}"
                    alt="{{ $product->name }}"
-                   class="w-full h-full object-contain transition-all duration-700 ease-in-out">
+                   class="w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-110">
             </div>
 
             <div class="p-6 space-y-3 transition-all duration-700 ease-in-out">

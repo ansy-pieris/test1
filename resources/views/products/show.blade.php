@@ -20,11 +20,13 @@
           $img = $product->image ?: '';
           $src = Str::startsWith($img, ['http', 'storage/', '/images/'])
                   ? asset($img)
-                  : asset('storage/'.$img);
+                  : asset('storage/products/'.$img);
         @endphp
-        <img src="{{ $src }}"
-             alt="{{ $product->name }}"
-             class="w-full h-auto rounded-xl shadow-lg object-contain">
+        <div class="w-full h-96 lg:h-[500px] overflow-hidden bg-white rounded-xl shadow-lg">
+          <img src="{{ $src }}"
+               alt="{{ $product->name }}"
+               class="w-full h-full object-cover">
+        </div>
       </div>
 
       {{-- Product Details + Add to Cart --}}

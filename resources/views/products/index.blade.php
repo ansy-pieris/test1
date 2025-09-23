@@ -34,7 +34,9 @@
 
             <a href="{{ route('products.category', ['category' => $slug]) }}"
                class="group relative rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 hover:scale-[1.02] transition duration-500">
-              <img src="{{ $image }}" alt="{{ $name }}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-700">
+              <div class="w-full h-48 overflow-hidden bg-white">
+                <img src="{{ $image }}" alt="{{ $name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+              </div>
               <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
               <div class="absolute bottom-0 p-4">
                 <div class="text-lg font-semibold">{{ strtoupper($name) }}</div>

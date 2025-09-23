@@ -43,6 +43,25 @@ return [
             'transaction_mode' => 'DEFERRED',
         ],
 
+        // MongoDB Connection for Advanced NoSQL Features
+        'mongodb' => [
+            'driver' => 'mongodb',
+            'host' => env('MONGODB_HOST', '127.0.0.1'),
+            'port' => env('MONGODB_PORT', 27017),
+            'database' => env('MONGODB_DATABASE', 'apparel_store_mongo'),
+            'username' => env('MONGODB_USERNAME'),
+            'password' => env('MONGODB_PASSWORD'),
+            'options' => [
+                'ssl' => env('MONGODB_SSL', false),
+                'replicaSet' => env('MONGODB_REPLICA_SET'),
+                'authSource' => env('MONGODB_AUTH_SOURCE', 'admin'),
+                'readPreference' => env('MONGODB_READ_PREFERENCE', 'primaryPreferred'),
+                'writeConcern' => env('MONGODB_WRITE_CONCERN', 'majority'),
+                'maxPoolSize' => env('MONGODB_MAX_POOL_SIZE', 100),
+                'minPoolSize' => env('MONGODB_MIN_POOL_SIZE', 5),
+            ],
+        ],
+
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),

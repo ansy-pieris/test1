@@ -12,9 +12,23 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Register your custom route middleware aliases here
+        // Register enhanced API middleware for outstanding Sanctum integration
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'enhanced.sanctum' => \App\Http\Middleware\Api\EnhancedSanctumAuth::class,
+        ]);
+
+        // API-specific middleware groups
+        $middleware->group('api', [
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        ]);
+
+        // Enhanced API rate limiting
+        $middleware->throttle([
+            'api' => \Illuminate\Routing\Middleware\ThrottleRequests::class.':60,1',
+            'auth' => \Illuminate\Routing\Middleware\ThrottleRequests::class.':5,15', // 5 attempts per 15 minutes
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

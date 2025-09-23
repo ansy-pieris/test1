@@ -1,22 +1,22 @@
 @extends('layouts.app')
 
-@section('title', 'Manage Orders - Admin')
+@section('title', 'Manage Orders - ' . ucfirst($routePrefix ?? 'Admin'))
 
 @section('content')
-<div class="bg-gray-100 min-h-screen">
+<div class="bg-black min-h-screen pt-24">
     <main class="max-w-7xl mx-auto p-6">
-        <h1 class="text-3xl font-semibold mb-6">Manage Orders</h1>
+        <h1 class="text-3xl font-semibold mb-6 text-white">Manage Orders</h1>
 
         <!-- Orders Table -->
         <section class="bg-white p-6 rounded shadow">
             <table class="min-w-full border-collapse border border-gray-300">
-                <thead>
+                <thead class="bg-black">
                     <tr>
-                        <th class="border border-gray-300 px-4 py-2 text-center">Order ID</th>
-                        <th class="border border-gray-300 px-4 py-2 text-center">Customer Name</th>
-                        <th class="border border-gray-300 px-4 py-2 text-center">Order Date</th>
-                        <th class="border border-gray-300 px-4 py-2 text-center">Status</th>
-                        <th class="border border-gray-300 px-4 py-2 text-center">Update Status</th>
+                        <th class="border border-gray-300 px-4 py-2 text-center text-white font-semibold">Order ID</th>
+                        <th class="border border-gray-300 px-4 py-2 text-center text-white font-semibold">Customer Name</th>
+                        <th class="border border-gray-300 px-4 py-2 text-center text-white font-semibold">Order Date</th>
+                        <th class="border border-gray-300 px-4 py-2 text-center text-white font-semibold">Status</th>
+                        <th class="border border-gray-300 px-4 py-2 text-center text-white font-semibold">Update Status</th>
                         <!-- <th class="border border-gray-300 px-4 py-2 text-center">Actions</th> -->
                     </tr>
                 </thead>
@@ -34,14 +34,14 @@
                                 };
                             @endphp
                             <tr data-order-id="{{ $order->order_id }}">
-                                <td class="border border-gray-300 px-4 py-2 text-center">{{ $order->order_id }}</td>
-                                <td class="border border-gray-300 px-4 py-2 text-center">{{ $order->user_name }}</td>
-                                <td class="border border-gray-300 px-4 py-2 text-center">{{ $order->created_at->format('Y-m-d') }}</td>
+                                <td class="border border-gray-300 px-4 py-2 text-center text-gray-800 font-medium">{{ $order->order_id }}</td>
+                                <td class="border border-gray-300 px-4 py-2 text-center text-gray-800">{{ $order->user_name }}</td>
+                                <td class="border border-gray-300 px-4 py-2 text-center text-gray-600">{{ $order->created_at->format('Y-m-d') }}</td>
                                 <td class="border border-gray-300 px-4 py-2 font-semibold {{ $statusClass }} status-cell">
                                     {{ ucfirst($order->status) }}
                                 </td>
                                 <td class="border border-gray-300 px-4 py-2 text-center">
-                                    <select class="status-dropdown border border-gray-300 rounded px-2 py-1" data-order-id="{{ $order->order_id }}">
+                                    <select class="status-dropdown border border-gray-300 rounded px-2 py-1 text-gray-800 bg-white" data-order-id="{{ $order->order_id }}">>
                                         <option value="">Select Status</option>
                                         <option value="pending" {{ $order->status === 'pending' ? 'selected' : '' }}>Pending</option>
                                         <option value="processing" {{ $order->status === 'processing' ? 'selected' : '' }}>Processing</option>
@@ -59,7 +59,7 @@
                         @endforeach
                     @else
                         <tr>
-                            <td colspan="6" class="text-center p-4">No orders found.</td>
+                            <td colspan="6" class="text-center p-4 text-gray-600">No orders found.</td>
                         </tr>
                     @endif
                 </tbody>
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function updateOrderStatus(orderId, newStatus) {
-        fetch('{{ route("admin.orders.updateStatus") }}', {
+        fetch('{{ route($routePrefix . ".orders.updateStatus") }}', {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',

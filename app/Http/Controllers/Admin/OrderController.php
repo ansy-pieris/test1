@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
@@ -24,7 +25,11 @@ class OrderController extends Controller
         ->orderBy('orders.created_at', 'desc')
         ->get();
 
-        return view('admin.orders', compact('orders'));
+        // Detect if this is being accessed by staff or admin
+        $userRole = Auth::user()->role;
+        $routePrefix = $userRole === 'staff' ? 'staff' : 'admin';
+
+        return view('admin.orders', compact('orders', 'routePrefix'));
     }
 
     public function updateStatus(Request $request)
