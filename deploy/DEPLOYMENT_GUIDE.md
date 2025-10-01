@@ -9,6 +9,37 @@ This guide will help you deploy your Laravel Apparel Store application to an Ubu
 - MongoDB Atlas cluster set up
 - Your application files
 
+## 🚨 IMPORTANT: ERR_CONNECTION_REFUSED Troubleshooting
+
+If you get **ERR_CONNECTION_REFUSED** when visiting your site, the issue is most likely:
+
+### 1. AWS Security Group Configuration (Most Common Issue)
+**This is the #1 cause of connection refused errors!**
+
+1. Go to AWS EC2 Console
+2. Select your instance
+3. Click **Security** tab
+4. Click on your Security Group link
+5. Click **Edit inbound rules**
+6. Add these rules:
+   - **Type:** HTTP, **Protocol:** TCP, **Port:** 80, **Source:** 0.0.0.0/0
+   - **Type:** HTTPS, **Protocol:** TCP, **Port:** 443, **Source:** 0.0.0.0/0
+7. Save rules
+
+### 2. Ubuntu Firewall (UFW)
+```bash
+sudo ufw status
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+```
+
+### 3. Apache Service Status
+```bash
+sudo systemctl status apache2
+sudo systemctl start apache2
+sudo systemctl enable apache2
+```
+
 ## Deployment Steps
 
 ### 1. Prepare Your Local Files
