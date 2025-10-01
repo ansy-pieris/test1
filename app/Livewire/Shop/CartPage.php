@@ -50,19 +50,76 @@ class CartPage extends Component
 
         $item = CartItem::where('cart_id', $itemId)
                        ->where('user_id', auth()->id())
+                       ->with('product')
                        ->first();
 
-        if ($item) {
-            // Check stock availability
-            if ($quantity > $item->product->stock) {
-                session()->flash('error', 'Only ' . $item->product->stock . ' items available in stock.');
-                return;
-            }
-            
+        if (!$item) {
+            session()->flash('error', 'Item not found in cart.');
+            return;
+        }
+
+        if (!$item->product) {
+            session()->flash('error', 'Product no longer available.');
+            return;
+        }
+
+        // Check stock availability
+        if ($quantity > $item->product->stock) {
+            session()->flash('error', 'Only ' . $item->product->stock . ' items available in stock.');
+            $this->refreshCart(); // Refresh to show current state
+            return;
+        }
+        
+        try {
             $item->update(['quantity' => $quantity]);
-            $this->refreshCart(); // Refresh data immediately
-            $this->dispatch('cartUpdated'); // For other components
-            session()->flash('success', 'Cart updated successfully.');
+            
+            // Refresh the cart data
+            $this->refreshCart();
+            
+            // Dispatch event for other components (like cart counter)
+            $this->dispatch('cartUpdated');
+            
+            // Clear any previous error messages
+            session()->forget('error');
+            
+            \Log::info('Cart quantity updated', [
+                'cart_id' => $itemId,
+                'new_quantity' => $quantity,
+                'user_id' => auth()->id()
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to update cart quantity', [
+                'cart_id' => $itemId,
+                'quantity' => $quantity,
+                'error' => $e->getMessage()
+            ]);
+            session()->flash('error', 'Failed to update cart. Please try again.');
+        }
+    }
+
+    public function incrementQuantity($itemId)
+    {
+        $item = CartItem::where('cart_id', $itemId)
+                       ->where('user_id', auth()->id())
+                       ->with('product')
+                       ->first();
+        
+        if ($item && $item->product) {
+            $newQuantity = $item->quantity + 1;
+            $this->updateQuantity($itemId, $newQuantity);
+        }
+    }
+
+    public function decrementQuantity($itemId)
+    {
+        $item = CartItem::where('cart_id', $itemId)
+                       ->where('user_id', auth()->id())
+                       ->first();
+        
+        if ($item) {
+            $newQuantity = $item->quantity - 1;
+            $this->updateQuantity($itemId, $newQuantity);
         }
     }
 

@@ -2,7 +2,7 @@
 
 namespace App\Models\MongoDB;
 
-// use Jenssegers\Mongodb\Eloquent\Model; // When MongoDB extension is available
+use Jenssegers\Mongodb\Eloquent\Model;
 
 /**
  * Advanced MongoDB Product Model

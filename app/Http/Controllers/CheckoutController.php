@@ -63,6 +63,13 @@ class CheckoutController extends Controller
         $total = $items->sum(fn ($i) => $i->quantity * ($i->product->price ?? 0));
 
         DB::transaction(function () use ($user, $items, $total, $request) {
+            // Check stock availability first
+            foreach ($items as $i) {
+                if ($i->product->stock < $i->quantity) {
+                    throw new \Exception("Insufficient stock for {$i->product->name}. Only {$i->product->stock} available.");
+                }
+            }
+
             $order = Order::create([
                 'user_id'         => $user->id,
                 'status'          => 'pending',
@@ -81,6 +88,14 @@ class CheckoutController extends Controller
                     'product_id' => $i->product_id,
                     'qty'        => $i->quantity,
                     'price'      => $i->product->price ?? 0, // snapshot
+                ]);
+
+                // Reduce product stock
+                $i->product->decrement('stock', $i->quantity);
+                \Log::info('Stock reduced for product', [
+                    'product_id' => $i->product_id,
+                    'quantity_reduced' => $i->quantity,
+                    'remaining_stock' => $i->product->fresh()->stock
                 ]);
 
                 // remove from cart

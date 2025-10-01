@@ -2,565 +2,114 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\Auth\EnhancedAuthController;
-use App\Http\Controllers\Api\MongoDB\MongoApiController;
-use App\Http\Middleware\Api\EnhancedSanctumAuth;
-
-/**
- * Outstanding Laravel Sanctum API Routes with Advanced MongoDB Integration
- * 
- * This route configuration demonstrates exceptional proficiency in:
- * - Advanced API authentication and authorization
- * - Token scopes and multi-device management  
- * - Rate limiting and security features
- * - MongoDB integration with complex aggregations
- * - Comprehensive API versioning
- * - Real-time analytics and monitoring
- */
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\MongoAdvancedController;
+use App\Http\Controllers\Api\ProductApiController;
+use App\Http\Controllers\Api\CartApiController;
+use App\Http\Controllers\Api\OrderApiController;
+use App\Http\Controllers\Api\CategoryApiController;
 
 /*
 |--------------------------------------------------------------------------
-| API Authentication Routes (Public)
+| API Routes
 |--------------------------------------------------------------------------
-| These routes handle user authentication, token management, and device registration
-| without requiring authentication middleware for initial access.
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "api" middleware group. Make something great!
+|
 */
 
-Route::prefix('v1/auth')->group(function () {
-    // Advanced authentication endpoints
-    Route::post('login', [EnhancedAuthController::class, 'authenticate'])
-        ->name('api.auth.login')
-        ->middleware(['throttle:auth']);
-    
-    Route::post('register', [EnhancedAuthController::class, 'register'])
-        ->name('api.auth.register')
-        ->middleware(['throttle:auth']);
-    
-    Route::post('forgot-password', [EnhancedAuthController::class, 'forgotPassword'])
-        ->name('api.auth.forgot-password')
-        ->middleware(['throttle:auth']);
-    
-    Route::post('reset-password', [EnhancedAuthController::class, 'resetPassword'])
-        ->name('api.auth.reset-password')
-        ->middleware(['throttle:auth']);
-    
-    // OAuth and social authentication
-    Route::post('oauth/{provider}', [EnhancedAuthController::class, 'oauthLogin'])
-        ->name('api.auth.oauth')
-        ->middleware(['throttle:auth']);
-    
-    // Two-factor authentication
-    Route::post('2fa/verify', [EnhancedAuthController::class, 'verifyTwoFactor'])
-        ->name('api.auth.2fa.verify')
-        ->middleware(['throttle:auth']);
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
 });
 
 /*
 |--------------------------------------------------------------------------
-| Authenticated API Routes with Advanced Sanctum Features
+| APPAREL STORE API ROUTES
 |--------------------------------------------------------------------------
-| These routes require authentication and demonstrate outstanding Sanctum usage
-| with token scopes, device management, and advanced security features.
+| Complete e-commerce API with Laravel Sanctum + MongoDB
 */
 
-Route::prefix('v1')->middleware([EnhancedSanctumAuth::class])->group(function () {
+// ============================================================================
+// PUBLIC ROUTES (No Authentication Required)
+// ============================================================================
+
+Route::prefix('apparel')->group(function () {
     
-    /*
-    |--------------------------------------------------------------------------
-    | Token and Session Management
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('auth')->group(function () {
-        Route::get('profile', [EnhancedAuthController::class, 'getProfile'])
-            ->middleware([EnhancedSanctumAuth::class . ':user:read'])
-            ->name('api.auth.profile');
-        
-        Route::put('profile', [EnhancedAuthController::class, 'updateProfile'])
-            ->middleware([EnhancedSanctumAuth::class . ':user:write'])
-            ->name('api.auth.profile.update');
-        
-        Route::get('tokens', [EnhancedAuthController::class, 'getTokenInfo'])
-            ->name('api.auth.tokens');
-        
-        Route::post('tokens/refresh', [EnhancedAuthController::class, 'refreshToken'])
-            ->name('api.auth.tokens.refresh');
-        
-        Route::delete('tokens/{tokenId}', [EnhancedAuthController::class, 'revokeToken'])
-            ->name('api.auth.tokens.revoke');
-        
-        Route::post('logout', [EnhancedAuthController::class, 'logout'])
-            ->name('api.auth.logout');
-        
-        Route::post('logout-all', [EnhancedAuthController::class, 'logoutAllDevices'])
-            ->name('api.auth.logout-all');
-        
-        // Device management
-        Route::get('devices', [EnhancedAuthController::class, 'getDevices'])
-            ->name('api.auth.devices');
-        
-        Route::post('devices/trust', [EnhancedAuthController::class, 'trustDevice'])
-            ->name('api.auth.devices.trust');
-        
-        Route::delete('devices/{deviceId}', [EnhancedAuthController::class, 'revokeDevice'])
-            ->name('api.auth.devices.revoke');
-        
-        // Security features
-        Route::get('security/activity', [EnhancedAuthController::class, 'getSecurityActivity'])
-            ->name('api.auth.security.activity');
-        
-        Route::post('security/2fa/enable', [EnhancedAuthController::class, 'enableTwoFactor'])
-            ->middleware([EnhancedSanctumAuth::class . ':user:write'])
-            ->name('api.auth.security.2fa.enable');
-        
-        Route::post('security/2fa/disable', [EnhancedAuthController::class, 'disableTwoFactor'])
-            ->middleware([EnhancedSanctumAuth::class . ':user:write'])
-            ->name('api.auth.security.2fa.disable');
-    });
+    // ========================================
+    // AUTHENTICATION
+    // ========================================
+    Route::post('login', [AuthController::class, 'login']);        // User login
+    Route::post('register', [AuthController::class, 'register']);  // User registration
     
-    /*
-    |--------------------------------------------------------------------------
-    | MongoDB User Analytics and Management
-    |--------------------------------------------------------------------------
-    | Advanced user management with MongoDB aggregations and analytics
-    */
-    Route::prefix('users')->group(function () {
-        // User analytics with advanced MongoDB aggregations
-        Route::get('analytics', [MongoApiController::class, 'getUserAnalytics'])
-            ->middleware([EnhancedSanctumAuth::class . ':analytics:read'])
-            ->name('api.users.analytics');
-        
-        Route::get('segmentation', [MongoApiController::class, 'getUserSegmentation'])
-            ->middleware([EnhancedSanctumAuth::class . ':analytics:read'])
-            ->name('api.users.segmentation');
-        
-        Route::get('activity-patterns', [MongoApiController::class, 'getUserActivityPatterns'])
-            ->middleware([EnhancedSanctumAuth::class . ':analytics:read'])
-            ->name('api.users.activity-patterns');
-        
-        // Geographic analytics
-        Route::get('geographic-distribution', [MongoApiController::class, 'getGeographicDistribution'])
-            ->middleware([EnhancedSanctumAuth::class . ':analytics:read'])
-            ->name('api.users.geographic');
-        
-        // Customer lifetime value analysis
-        Route::get('ltv-analysis', [MongoApiController::class, 'getCustomerLTVAnalysis'])
-            ->middleware([EnhancedSanctumAuth::class . ':analytics:read'])
-            ->name('api.users.ltv-analysis');
-        
-        // User management (admin only)
-        Route::middleware([EnhancedSanctumAuth::class . ':user:admin'])->group(function () {
-            Route::get('/', [MongoApiController::class, 'getUsers'])
-                ->name('api.users.index');
-            
-            Route::get('{userId}', [MongoApiController::class, 'getUser'])
-                ->name('api.users.show');
-            
-            Route::put('{userId}', [MongoApiController::class, 'updateUser'])
-                ->name('api.users.update');
-            
-            Route::delete('{userId}', [MongoApiController::class, 'deleteUser'])
-                ->name('api.users.delete');
-        });
-    });
+    // ========================================
+    // PRODUCT BROWSING
+    // ========================================
+    Route::get('products', [ProductApiController::class, 'index']);         // Get all products
+    Route::get('products/{id}', [ProductApiController::class, 'show']);     // Get single product
+    Route::get('products/search', [ProductApiController::class, 'search']); // Search products
+    Route::get('products/featured', [ProductApiController::class, 'featured']); // Featured products
     
-    /*
-    |--------------------------------------------------------------------------
-    | Advanced Product Catalog with MongoDB Features
-    |--------------------------------------------------------------------------
-    | Sophisticated product management with full-text search, geospatial queries,
-    | and complex aggregations for outstanding MongoDB integration
-    */
-    Route::prefix('products')->group(function () {
-        // Public product endpoints (read access)
-        Route::middleware([EnhancedSanctumAuth::class . ':products:read'])->group(function () {
-            Route::get('search', [MongoApiController::class, 'searchProducts'])
-                ->name('api.products.search');
-            
-            Route::get('/', [MongoApiController::class, 'getProducts'])
-                ->name('api.products.index');
-            
-            Route::get('{productId}', [MongoApiController::class, 'getProduct'])
-                ->name('api.products.show');
-            
-            Route::get('categories', [MongoApiController::class, 'getCategories'])
-                ->name('api.products.categories');
-            
-            Route::get('brands', [MongoApiController::class, 'getBrands'])
-                ->name('api.products.brands');
-            
-            // Advanced filtering and analytics
-            Route::get('filters/available', [MongoApiController::class, 'getAvailableFilters'])
-                ->name('api.products.filters');
-            
-            Route::get('recommendations/{userId}', [MongoApiController::class, 'getProductRecommendations'])
-                ->name('api.products.recommendations');
-            
-            // Geospatial product queries
-            Route::get('nearby', [MongoApiController::class, 'getNearbyProducts'])
-                ->name('api.products.nearby');
-            
-            Route::get('inventory/locations', [MongoApiController::class, 'getInventoryLocations'])
-                ->name('api.products.inventory.locations');
-        });
-        
-        // Product analytics
-        Route::middleware([EnhancedSanctumAuth::class . ':analytics:read'])->group(function () {
-            Route::get('analytics/performance', [MongoApiController::class, 'getProductPerformance'])
-                ->name('api.products.analytics.performance');
-            
-            Route::get('analytics/trends', [MongoApiController::class, 'getProductTrends'])
-                ->name('api.products.analytics.trends');
-            
-            Route::get('analytics/inventory', [MongoApiController::class, 'getInventoryAnalytics'])
-                ->name('api.products.analytics.inventory');
-        });
-        
-        // Product management (staff and admin)
-        Route::middleware([EnhancedSanctumAuth::class . ':products:write'])->group(function () {
-            Route::post('/', [MongoApiController::class, 'createProduct'])
-                ->name('api.products.create');
-            
-            Route::put('{productId}', [MongoApiController::class, 'updateProduct'])
-                ->name('api.products.update');
-            
-            Route::post('{productId}/variants', [MongoApiController::class, 'addProductVariant'])
-                ->name('api.products.variants.add');
-            
-            Route::put('{productId}/variants/{variantId}', [MongoApiController::class, 'updateProductVariant'])
-                ->name('api.products.variants.update');
-            
-            Route::post('{productId}/images', [MongoApiController::class, 'uploadProductImages'])
-                ->name('api.products.images.upload');
-        });
-        
-        // Inventory management
-        Route::middleware([EnhancedSanctumAuth::class . ':inventory:write'])->group(function () {
-            Route::put('{productId}/inventory', [MongoApiController::class, 'updateInventory'])
-                ->name('api.products.inventory.update');
-            
-            Route::post('inventory/bulk-update', [MongoApiController::class, 'bulkUpdateInventory'])
-                ->name('api.products.inventory.bulk-update');
-            
-            Route::post('inventory/adjustment', [MongoApiController::class, 'inventoryAdjustment'])
-                ->name('api.products.inventory.adjustment');
-        });
-        
-        // Admin-only operations
-        Route::middleware([EnhancedSanctumAuth::class . ':products:admin'])->group(function () {
-            Route::delete('{productId}', [MongoApiController::class, 'deleteProduct'])
-                ->name('api.products.delete');
-            
-            Route::post('import', [MongoApiController::class, 'importProducts'])
-                ->name('api.products.import');
-            
-            Route::get('export', [MongoApiController::class, 'exportProducts'])
-                ->name('api.products.export');
-        });
-    });
-    
-    /*
-    |--------------------------------------------------------------------------
-    | Advanced Order Management with Real-time Tracking
-    |--------------------------------------------------------------------------
-    | Comprehensive order management with MongoDB's advanced features
-    */
-    Route::prefix('orders')->group(function () {
-        // Customer order access
-        Route::middleware([EnhancedSanctumAuth::class . ':orders:read'])->group(function () {
-            Route::get('/', [MongoApiController::class, 'getUserOrders'])
-                ->name('api.orders.user.index');
-            
-            Route::get('{orderId}', [MongoApiController::class, 'getOrder'])
-                ->name('api.orders.show');
-            
-            Route::get('{orderId}/tracking', [MongoApiController::class, 'getOrderTracking'])
-                ->name('api.orders.tracking');
-            
-            Route::get('{orderId}/status-history', [MongoApiController::class, 'getOrderStatusHistory'])
-                ->name('api.orders.status-history');
-        });
-        
-        // Order creation and modification
-        Route::middleware([EnhancedSanctumAuth::class . ':orders:write'])->group(function () {
-            Route::post('/', [MongoApiController::class, 'createOrder'])
-                ->name('api.orders.create');
-            
-            Route::put('{orderId}', [MongoApiController::class, 'updateOrder'])
-                ->name('api.orders.update');
-            
-            Route::post('{orderId}/cancel', [MongoApiController::class, 'cancelOrder'])
-                ->name('api.orders.cancel');
-        });
-        
-        // Payment processing
-        Route::middleware([EnhancedSanctumAuth::class . ':payments:process'])->group(function () {
-            Route::post('{orderId}/payment', [MongoApiController::class, 'processPayment'])
-                ->name('api.orders.payment');
-            
-            Route::post('{orderId}/payment/refund', [MongoApiController::class, 'processRefund'])
-                ->name('api.orders.payment.refund');
-        });
-        
-        // Staff order management
-        Route::middleware([EnhancedSanctumAuth::class . ':orders:admin'])->group(function () {
-            Route::get('all', [MongoApiController::class, 'getAllOrders'])
-                ->name('api.orders.all');
-            
-            Route::post('{orderId}/fulfill', [MongoApiController::class, 'fulfillOrder'])
-                ->name('api.orders.fulfill');
-            
-            Route::post('{orderId}/ship', [MongoApiController::class, 'shipOrder'])
-                ->name('api.orders.ship');
-            
-            Route::post('{orderId}/deliver', [MongoApiController::class, 'markOrderDelivered'])
-                ->name('api.orders.deliver');
-        });
-        
-        // Order analytics
-        Route::middleware([EnhancedSanctumAuth::class . ':analytics:read'])->group(function () {
-            Route::get('analytics/sales', [MongoApiController::class, 'getSalesAnalytics'])
-                ->name('api.orders.analytics.sales');
-            
-            Route::get('analytics/performance', [MongoApiController::class, 'getOrderPerformanceAnalytics'])
-                ->name('api.orders.analytics.performance');
-            
-            Route::get('analytics/customer-behavior', [MongoApiController::class, 'getCustomerBehaviorAnalytics'])
-                ->name('api.orders.analytics.customer-behavior');
-            
-            Route::get('analytics/geographic', [MongoApiController::class, 'getGeographicSalesAnalytics'])
-                ->name('api.orders.analytics.geographic');
-        });
-    });
-    
-    /*
-    |--------------------------------------------------------------------------
-    | Real-time Analytics Dashboard
-    |--------------------------------------------------------------------------
-    | Advanced analytics endpoints showcasing MongoDB's aggregation capabilities
-    */
-    Route::prefix('analytics')->middleware([EnhancedSanctumAuth::class . ':analytics:read'])->group(function () {
-        // Real-time dashboard metrics
-        Route::get('dashboard', [MongoApiController::class, 'getDashboardMetrics'])
-            ->name('api.analytics.dashboard');
-        
-        Route::get('realtime', [MongoApiController::class, 'getRealtimeMetrics'])
-            ->name('api.analytics.realtime');
-        
-        // Business intelligence
-        Route::get('revenue/trends', [MongoApiController::class, 'getRevenueTrends'])
-            ->name('api.analytics.revenue.trends');
-        
-        Route::get('customer/lifetime-value', [MongoApiController::class, 'getCustomerLifetimeValue'])
-            ->name('api.analytics.customer.ltv');
-        
-        Route::get('product/performance', [MongoApiController::class, 'getProductPerformanceMetrics'])
-            ->name('api.analytics.product.performance');
-        
-        Route::get('inventory/turnover', [MongoApiController::class, 'getInventoryTurnoverAnalytics'])
-            ->name('api.analytics.inventory.turnover');
-        
-        // Predictive analytics
-        Route::get('forecasting/demand', [MongoApiController::class, 'getDemandForecasting'])
-            ->name('api.analytics.forecasting.demand');
-        
-        Route::get('forecasting/revenue', [MongoApiController::class, 'getRevenueForecasting'])
-            ->name('api.analytics.forecasting.revenue');
-        
-        // Custom reports
-        Route::post('reports/custom', [MongoApiController::class, 'generateCustomReport'])
-            ->name('api.analytics.reports.custom');
-        
-        Route::get('reports/scheduled', [MongoApiController::class, 'getScheduledReports'])
-            ->name('api.analytics.reports.scheduled');
-        
-        // Export capabilities
-        Route::middleware([EnhancedSanctumAuth::class . ':analytics:export'])->group(function () {
-            Route::post('export/csv', [MongoApiController::class, 'exportAnalyticsCSV'])
-                ->name('api.analytics.export.csv');
-            
-            Route::post('export/pdf', [MongoApiController::class, 'exportAnalyticsPDF'])
-                ->name('api.analytics.export.pdf');
-            
-            Route::post('export/excel', [MongoApiController::class, 'exportAnalyticsExcel'])
-                ->name('api.analytics.export.excel');
-        });
-    });
-    
-    /*
-    |--------------------------------------------------------------------------
-    | System Administration Routes
-    |--------------------------------------------------------------------------
-    | Advanced system management with comprehensive monitoring
-    */
-    Route::prefix('system')->middleware([EnhancedSanctumAuth::class . ':system:admin'])->group(function () {
-        // MongoDB health and performance monitoring
-        Route::get('health', [MongoApiController::class, 'getSystemHealth'])
-            ->name('api.system.health');
-        
-        Route::get('mongodb/status', [MongoApiController::class, 'getMongoDBStatus'])
-            ->name('api.system.mongodb.status');
-        
-        Route::get('mongodb/performance', [MongoApiController::class, 'getMongoDBPerformance'])
-            ->name('api.system.mongodb.performance');
-        
-        Route::get('mongodb/indexes', [MongoApiController::class, 'getMongoDBIndexes'])
-            ->name('api.system.mongodb.indexes');
-        
-        // API performance monitoring
-        Route::get('api/metrics', [MongoApiController::class, 'getAPIMetrics'])
-            ->name('api.system.api.metrics');
-        
-        Route::get('api/rate-limits', [MongoApiController::class, 'getRateLimitStatus'])
-            ->name('api.system.api.rate-limits');
-        
-        Route::get('tokens/analytics', [MongoApiController::class, 'getTokenAnalytics'])
-            ->name('api.system.tokens.analytics');
-        
-        // Security monitoring
-        Route::get('security/events', [MongoApiController::class, 'getSecurityEvents'])
-            ->name('api.system.security.events');
-        
-        Route::get('security/threats', [MongoApiController::class, 'getSecurityThreats'])
-            ->name('api.system.security.threats');
-        
-        // System maintenance
-        Route::post('maintenance/optimize', [MongoApiController::class, 'optimizeSystem'])
-            ->name('api.system.maintenance.optimize');
-        
-        Route::post('cache/clear', [MongoApiController::class, 'clearSystemCache'])
-            ->name('api.system.cache.clear');
-        
-        Route::post('tokens/cleanup', [MongoApiController::class, 'cleanupExpiredTokens'])
-            ->name('api.system.tokens.cleanup');
-    });
-    
-    /*
-    |--------------------------------------------------------------------------
-    | Integration and Webhook Management
-    |--------------------------------------------------------------------------
-    | Third-party integrations and webhook handling
-    */
-    Route::prefix('integrations')->middleware([EnhancedSanctumAuth::class . ':integrations:write'])->group(function () {
-        // Webhook management
-        Route::get('webhooks', [MongoApiController::class, 'getWebhooks'])
-            ->name('api.integrations.webhooks.index');
-        
-        Route::post('webhooks', [MongoApiController::class, 'createWebhook'])
-            ->name('api.integrations.webhooks.create');
-        
-        Route::put('webhooks/{webhookId}', [MongoApiController::class, 'updateWebhook'])
-            ->name('api.integrations.webhooks.update');
-        
-        Route::delete('webhooks/{webhookId}', [MongoApiController::class, 'deleteWebhook'])
-            ->name('api.integrations.webhooks.delete');
-        
-        Route::post('webhooks/{webhookId}/test', [MongoApiController::class, 'testWebhook'])
-            ->name('api.integrations.webhooks.test');
-        
-        // API keys and external service management
-        Route::get('api-keys', [MongoApiController::class, 'getAPIKeys'])
-            ->name('api.integrations.api-keys.index');
-        
-        Route::post('api-keys', [MongoApiController::class, 'createAPIKey'])
-            ->name('api.integrations.api-keys.create');
-        
-        Route::delete('api-keys/{keyId}', [MongoApiController::class, 'revokeAPIKey'])
-            ->name('api.integrations.api-keys.revoke');
-    });
+    // ========================================
+    // CATEGORY BROWSING
+    // ========================================
+    Route::get('categories', [CategoryApiController::class, 'index']);              // Get all categories
+    Route::get('categories/{id}', [CategoryApiController::class, 'show']);          // Get single category
+    Route::get('categories/{id}/products', [CategoryApiController::class, 'getProducts']); // Category products
+    Route::get('categories/{id}/stats', [CategoryApiController::class, 'getStats']);       // Category statistics
 });
 
-/*
-|--------------------------------------------------------------------------
-| API Version 2 Routes (Future-proofing)
-|--------------------------------------------------------------------------
-| Demonstration of API versioning strategy for continuous evolution
-*/
-Route::prefix('v2')->middleware([EnhancedSanctumAuth::class])->group(function () {
-    Route::get('status', function () {
-        return response()->json([
-            'version' => 'v2',
-            'status' => 'development',
-            'features' => [
-                'enhanced_aggregations',
-                'machine_learning_insights',
-                'advanced_security',
-                'real_time_collaboration'
-            ],
-            'compatibility' => [
-                'v1' => 'supported',
-                'deprecation_notice' => 'v1 will be supported until 2025-12-31'
-            ]
-        ]);
-    })->name('api.v2.status');
-});
+// ============================================================================
+// PROTECTED ROUTES (Authentication Required - Bearer Token)
+// ============================================================================
 
-/*
-|--------------------------------------------------------------------------
-| Public API Information Routes
-|--------------------------------------------------------------------------
-| No authentication required - public API documentation and status
-*/
-Route::prefix('info')->group(function () {
-    Route::get('status', function () {
-        return response()->json([
-            'service' => 'Apparel Store API',
-            'version' => 'v1.0.0',
-            'status' => 'operational',
-            'features' => [
-                'outstanding_laravel_sanctum' => 'enabled',
-                'advanced_mongodb_integration' => 'enabled',
-                'real_time_analytics' => 'enabled',
-                'multi_device_authentication' => 'enabled',
-                'comprehensive_security' => 'enabled'
-            ],
-            'documentation' => url('/api/documentation'),
-            'support' => 'api-support@apparelstore.com'
-        ]);
-    })->name('api.info.status');
+Route::middleware('auth:sanctum')->prefix('apparel')->group(function () {
     
-    Route::get('health', function () {
-        return response()->json([
-            'timestamp' => now()->toISOString(),
-            'uptime' => 'operational',
-            'database' => 'connected',
-            'mongodb' => 'connected',
-            'cache' => 'operational',
-            'queue' => 'operational'
-        ]);
-    })->name('api.info.health');
+    // ========================================
+    // USER MANAGEMENT
+    // ========================================
+    Route::get('profile', [AuthController::class, 'getProfile']);      // Get user profile
+    Route::put('profile', [AuthController::class, 'updateProfile']);   // Update profile
+    Route::post('logout', [AuthController::class, 'logout']);          // Logout user
+    Route::get('status', [AuthController::class, 'status']);           // API status
     
-    Route::get('endpoints', function () {
-        return response()->json([
-            'authentication' => '/api/v1/auth/*',
-            'users' => '/api/v1/users/*',
-            'products' => '/api/v1/products/*',
-            'orders' => '/api/v1/orders/*',
-            'analytics' => '/api/v1/analytics/*',
-            'system' => '/api/v1/system/*',
-            'integrations' => '/api/v1/integrations/*',
-            'documentation' => '/api/docs',
-            'rate_limits' => 'Role-based with token scopes',
-            'authentication_types' => ['Bearer Token', 'API Key', 'OAuth 2.0']
-        ]);
-    })->name('api.info.endpoints');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Rate Limiting Configuration
-|--------------------------------------------------------------------------
-| Advanced rate limiting with role-based and endpoint-specific limits
-*/
-Route::middleware('throttle:api')->group(function () {
-    // Additional rate-limited endpoints can be added here
-});
-
-// Fallback route for API
-Route::fallback(function () {
-    return response()->json([
-        'error' => 'API endpoint not found',
-        'message' => 'The requested API endpoint does not exist',
-        'available_versions' => ['v1', 'v2'],
-        'documentation' => url('/api/docs')
-    ], 404);
+    // ========================================
+    // SHOPPING CART
+    // ========================================
+    Route::get('cart', [CartApiController::class, 'index']);                 // View cart
+    Route::get('cart/count', [CartApiController::class, 'getCartCount']);    // Cart item count
+    Route::post('cart/add', [CartApiController::class, 'addToCart']);        // Add to cart
+    Route::put('cart/{id}', [CartApiController::class, 'updateQuantity']);   // Update quantity
+    Route::delete('cart/{id}', [CartApiController::class, 'removeFromCart']); // Remove item
+    Route::delete('cart/clear', [CartApiController::class, 'clearCart']);    // Clear cart
+    
+    // ========================================
+    // ORDERS
+    // ========================================
+    Route::post('checkout', [OrderApiController::class, 'checkout']);            // Process checkout
+    Route::get('orders', [OrderApiController::class, 'getUserOrders']);          // Order history
+    Route::get('orders/{id}', [OrderApiController::class, 'getOrderDetails']);   // Order details
+    Route::put('orders/{id}/cancel', [OrderApiController::class, 'cancelOrder']); // Cancel order
+    Route::get('track/{orderNumber}', [OrderApiController::class, 'trackOrder']); // Track order
+    
+    // ========================================
+    // ADMIN - PRODUCT MANAGEMENT
+    // ========================================
+    Route::post('admin/products', [ProductApiController::class, 'store']);      // Create product
+    Route::put('admin/products/{id}', [ProductApiController::class, 'update']); // Update product
+    Route::delete('admin/products/{id}', [ProductApiController::class, 'destroy']); // Delete product
+    
+    // ========================================
+    // ADMIN - CATEGORY MANAGEMENT
+    // ========================================
+    Route::post('admin/categories', [CategoryApiController::class, 'store']);      // Create category
+    Route::put('admin/categories/{id}', [CategoryApiController::class, 'update']); // Update category
+    Route::delete('admin/categories/{id}', [CategoryApiController::class, 'destroy']); // Delete category
+    
+    // ========================================
+    // UNIVERSITY ASSIGNMENT - MONGODB DEMOS
+    // ========================================
+    Route::post('mongo-demo', [MongoAdvancedController::class, 'advancedNoSQLDemo']); // MongoDB aggregation
+    Route::post('create-document', [MongoAdvancedController::class, 'createDocument']); // Create MongoDB doc
 });

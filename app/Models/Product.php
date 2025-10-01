@@ -54,4 +54,81 @@ class Product extends Model
         }
         return $slug;
     }
+
+    /**
+     * Get the product image URL with fallback
+     */
+    public function getImageUrlAttribute()
+    {
+        if ($this->image) {
+            // First check if symlink exists, create if missing
+            $this->ensureStorageSymlink();
+            
+            $imagePath = public_path('storage/products/' . $this->image);
+            if (file_exists($imagePath)) {
+                return asset('storage/products/' . $this->image);
+            }
+            
+            // Fallback: try direct storage path
+            $storagePath = storage_path('app/public/products/' . $this->image);
+            if (file_exists($storagePath)) {
+                return asset('storage/products/' . $this->image);
+            }
+        }
+        
+        // Fallback to placeholder image
+        return asset('images/placeholder.jpg');
+    }
+
+    /**
+     * Check if product has a valid image
+     */
+    public function hasImage()
+    {
+        if (!$this->image) return false;
+        
+        $imagePath = public_path('storage/products/' . $this->image);
+        if (file_exists($imagePath)) return true;
+        
+        // Fallback: check storage path directly
+        $storagePath = storage_path('app/public/products/' . $this->image);
+        return file_exists($storagePath);
+    }
+
+    /**
+     * Ensure storage symlink exists (Windows compatible)
+     */
+    private function ensureStorageSymlink()
+    {
+        $linkPath = public_path('storage');
+        $targetPath = storage_path('app/public');
+        
+        // Check if symlink already exists and is working
+        if (is_link($linkPath) && is_dir($linkPath)) {
+            return;
+        }
+        
+        // Remove broken symlink if exists
+        if (file_exists($linkPath) || is_link($linkPath)) {
+            if (PHP_OS_FAMILY === 'Windows') {
+                exec("rmdir /s /q \"$linkPath\" 2>nul");
+            } else {
+                unlink($linkPath);
+            }
+        }
+        
+        // Create new symlink
+        try {
+            if (PHP_OS_FAMILY === 'Windows') {
+                // Use Windows mklink command
+                $relativePath = '..\\storage\\app\\public';
+                $command = "mklink /D \"$linkPath\" \"$relativePath\"";
+                exec($command);
+            } else {
+                symlink($targetPath, $linkPath);
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Failed to create storage symlink: ' . $e->getMessage());
+        }
+    }
 }

@@ -81,8 +81,8 @@
                             @foreach($items as $item)
                                 <tr class="border-b border-gray-700">
                                     <td class="py-2 flex items-center space-x-3">
-                                        @if($item->product->images && count($item->product->images) > 0)
-                                            <img src="{{ Storage::url($item->product->images[0]) }}" 
+                                        @if($item->product && $item->product->image)
+                                            <img src="{{ $item->product->image_url }}" 
                                                  class="w-12 h-12 object-cover rounded" 
                                                  alt="{{ $item->product->name }}">
                                         @else

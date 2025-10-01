@@ -6,7 +6,8 @@ use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-// use Jenssegers\Mongodb\Eloquent\Model; // When MongoDB extension is available
+// use Jenssegers\Mongodb\Eloquent\Model; // Commented out due to missing ext-mongodb
+use Illuminate\Database\Eloquent\Model; // Fallback to regular Eloquent
 
 /**
  * Advanced MongoDB User Model
@@ -20,8 +21,8 @@ class User extends Model implements AuthenticatableContract
 {
     use HasApiTokens, Notifiable, Authenticatable;
 
-    protected $connection = 'mongodb';
-    protected $collection = 'users';
+    // protected $connection = 'mongodb'; // Commented out - fallback to default DB
+    protected $table = 'users'; // Use regular table instead of MongoDB collection
 
     protected $fillable = [
         'name', 'email', 'password', 'role', 'phone',

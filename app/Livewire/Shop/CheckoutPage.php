@@ -118,6 +118,13 @@ class CheckoutPage extends Component
         try {
             DB::beginTransaction();
 
+            // Check stock availability first
+            foreach ($this->items as $cartItem) {
+                if ($cartItem->product->stock < $cartItem->quantity) {
+                    throw new \Exception("Insufficient stock for {$cartItem->product->name}. Only {$cartItem->product->stock} available.");
+                }
+            }
+
             // Create the order
             $order = Order::create([
                 'user_id' => Auth::id(),
@@ -125,13 +132,21 @@ class CheckoutPage extends Component
                 'status' => 'pending',
             ]);
 
-            // Create order items
+            // Create order items and reduce stock
             foreach ($this->items as $cartItem) {
                 OrderItem::create([
                     'order_id' => $order->order_id, // Use order_id instead of id
                     'product_id' => $cartItem->product_id,
                     'quantity' => $cartItem->quantity,
                     'price' => $cartItem->product->price,
+                ]);
+
+                // Reduce product stock
+                $cartItem->product->decrement('stock', $cartItem->quantity);
+                \Log::info('Stock reduced for product via Livewire checkout', [
+                    'product_id' => $cartItem->product_id,
+                    'quantity_reduced' => $cartItem->quantity,
+                    'remaining_stock' => $cartItem->product->fresh()->stock
                 ]);
             }
 
@@ -151,9 +166,21 @@ class CheckoutPage extends Component
 
             DB::commit();
 
+            // Send order confirmation email via Google Gmail API
+            try {
+                $googleMailService = new \App\Services\GoogleMailService();
+                $user = Auth::user();
+                $orderWithItems = $order->load(['items.product']);
+                $googleMailService->sendOrderConfirmation($orderWithItems, $user->email);
+                \Log::info('Order confirmation email sent successfully', ['order_id' => $order->order_id, 'email' => $user->email]);
+            } catch (\Exception $e) {
+                // Log email error but don't fail the order
+                \Log::error('Order confirmation email failed: ' . $e->getMessage(), ['order_id' => $order->order_id]);
+            }
+
             // Flash success message with order details
             $deliveryDate = now()->addDays(4)->format('M j, Y');
-            session()->flash('order_success', "Thank you for your purchase! Order #{$order->order_id} will be delivered by {$deliveryDate}");
+            session()->flash('order_success', "Thank you for your purchase! Order #{$order->order_id} will be delivered by {$deliveryDate}. A confirmation email has been sent to {$user->email}.");
             
             // Dispatch event to update cart counter
             $this->dispatch('cartUpdated');

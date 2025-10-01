@@ -35,8 +35,33 @@ class ProductSeeder extends Seeder
                 'description' => 'Comfortable cotton t-shirt for everyday wear.',
                 'price' => 2500.00,
                 'stock' => 50,
+                'image' => '1758611952_shirt.jpg', // Use existing uploaded image
                 'is_active' => true,
                 'is_featured' => true,
+            ]);
+
+            Product::updateOrCreate(['slug' => 'mens-blazer'], [
+                'category_id' => $menCategory->category_id,
+                'name' => "Men's Professional Blazer",
+                'slug' => 'mens-blazer',
+                'description' => 'Stylish blazer perfect for office and formal occasions.',
+                'price' => 8500.00,
+                'stock' => 20,
+                'image' => '1758611930_blazer.jpg', // Use existing uploaded image
+                'is_active' => true,
+                'is_featured' => true,
+            ]);
+
+            Product::updateOrCreate(['slug' => 'mens-shorts'], [
+                'category_id' => $menCategory->category_id,
+                'name' => "Men's Casual Shorts",
+                'slug' => 'mens-shorts',
+                'description' => 'Comfortable shorts for casual and sports activities.',
+                'price' => 1800.00,
+                'stock' => 35,
+                'image' => '1758612010_shorts.jpg', // Use existing uploaded image
+                'is_active' => true,
+                'is_featured' => false,
             ]);
         }
 
@@ -48,8 +73,33 @@ class ProductSeeder extends Seeder
                 'description' => 'Elegant summer dress perfect for any occasion.',
                 'price' => 4500.00,
                 'stock' => 25,
+                'image' => '1758612034_skirt.jpg', // Use existing uploaded image
                 'is_active' => true,
                 'is_featured' => false,
+            ]);
+
+            Product::updateOrCreate(['slug' => 'womens-crop-top'], [
+                'category_id' => $womenCategory->category_id,
+                'name' => "Women's Stylish Crop Top",
+                'slug' => 'womens-crop-top',
+                'description' => 'Trendy crop top perfect for casual outings.',
+                'price' => 2200.00,
+                'stock' => 40,
+                'image' => '1758622529_crop.jpg', // Use existing uploaded image
+                'is_active' => true,
+                'is_featured' => true,
+            ]);
+
+            Product::updateOrCreate(['slug' => 'womens-jacket'], [
+                'category_id' => $womenCategory->category_id,
+                'name' => "Women's Winter Jacket",
+                'slug' => 'womens-jacket',
+                'description' => 'Warm and stylish jacket for winter season.',
+                'price' => 6500.00,
+                'stock' => 15,
+                'image' => '1758611969_jacket.jpg', // Use existing uploaded image
+                'is_active' => true,
+                'is_featured' => true,
             ]);
         }
     }

@@ -20,12 +20,12 @@
       'subtitle' => 'Statement pieces & everyday essentials.',
     ],
     'footwear' => [
-      'img'      => asset('images/heroes/footwear.jpg'),
+      'img'      => asset('images/heroes/sneakers.jpeg'),
       'title'    => 'FOOTWEAR',
       'subtitle' => 'Step into comfort and style.',
     ],
     'accessories' => [
-      'img'      => asset('images/heroes/accessories.jpg'),
+      'img'      => asset('images/heroes/watch.jpg'),
       'title'    => 'ACCESSORIES',
       'subtitle' => 'Finish your look with the right detail.',
     ],
@@ -42,7 +42,7 @@
 @section('content')
   <!-- Hero Section (auto-picks the right one for the current category) -->
   <div class="relative w-full h-[60vh] bg-black text-white mt-16">
-    <img src="{{ $hero['img'] }}" alt="{{ $hero['title'] }}" class="w-full h-full object-cover opacity-30">
+    <img src="{{ $hero['img'] }}" alt="{{ $hero['title'] }}" class="w-full h-full object-contain opacity-30">
     <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
       <h1 class="text-5xl font-bold tracking-wide">{{ $hero['title'] }}</h1>
       @if(!empty($hero['subtitle']))
@@ -60,16 +60,18 @@
           <div class="bg-neutral-900 group rounded-2xl overflow-hidden shadow-xl 
                       transition-all duration-700 ease-in-out hover:bg-white hover:scale-105">
 
-            <div class="w-full h-80 overflow-hidden bg-white">
-              @php
-                $img = $product->image ?: '';
-                $src = Str::startsWith($img, ['http', 'storage/', '/images/'])
-                          ? asset(ltrim($img, '/'))
-                          : asset('storage/products/'.$img);
-              @endphp
-              <img src="{{ $src }}"
-                   alt="{{ $product->name }}"
-                   class="w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-110">
+            <div class="relative w-full h-80 overflow-hidden bg-white rounded-t-2xl">
+              @if($product->image)
+                <img src="{{ asset('storage/products/' . $product->image) }}"
+                     alt="{{ $product->name }}"
+                     class="w-full h-full object-cover object-center transition-all duration-700 ease-in-out group-hover:scale-110">
+              @else
+                <div class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500">
+                  <svg class="w-16 h-16 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+              @endif
             </div>
 
             <div class="p-6 space-y-3 transition-all duration-700 ease-in-out">

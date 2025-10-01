@@ -7,7 +7,7 @@
   {{-- Hero Section with Background Image and Text Overlay --}}
   <div class="relative h-[300px] md:h-[400px] lg:h-[400px] w-full">
     {{-- Background Image --}}
-    <img src="{{ asset('images/contact-banner.jpg') }}" alt="Contact Banner" class="absolute inset-0 w-full h-full object-cover opacity-40">
+    <img src="{{ asset('images/hero3.webp') }}" alt="Contact Banner" class="absolute inset-0 w-full h-full object-cover opacity-100">
 
     {{-- Optional dark overlay --}}
     <div class="absolute inset-0 bg-black/50"></div>

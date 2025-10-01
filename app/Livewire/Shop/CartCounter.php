@@ -7,16 +7,29 @@ use Livewire\Component;
 
 class CartCounter extends Component
 {
-    protected $listeners = ['cartUpdated' => '$refresh'];
+    public $count = 0;
+    
+    protected $listeners = ['cartUpdated' => 'refreshCount'];
 
-    public function render()
+    public function mount()
     {
-        $count = auth()->check() 
+        $this->refreshCount();
+    }
+    
+    public function refreshCount()
+    {
+        $this->count = auth()->check() 
             ? CartItem::where('user_id', auth()->id())->sum('quantity')
             : 0;
 
-        \Log::info('CartCounter render called', ['count' => $count, 'user_id' => auth()->id()]);
+        \Log::info('CartCounter refreshed', ['count' => $this->count, 'user_id' => auth()->id()]);
+        
+        // Dispatch browser event to update Alpine.js
+        $this->dispatch('cart-count-updated', count: $this->count);
+    }
 
-        return view('livewire.shop.cart-counter', compact('count'));
+    public function render()
+    {
+        return view('livewire.shop.cart-counter');
     }
 }

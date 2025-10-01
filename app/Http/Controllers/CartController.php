@@ -27,6 +27,19 @@ class CartController extends Controller
             'product_id' => 'required|exists:products,product_id',
             'quantity' => 'required|integer|min:1',
         ]);
+
+        $product = Product::findOrFail($request->product_id);
+        
+        // Check stock availability
+        if ($product->stock < $request->quantity) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Not enough stock available. Only ' . $product->stock . ' items left.'
+                ], 422);
+            }
+            return redirect()->back()->with('error', 'Not enough stock available.');
+        }
         
         // Check if item already exists in cart
         $cartItem = CartItem::where('user_id', Auth::id())
@@ -34,7 +47,20 @@ class CartController extends Controller
             ->first();
         
         if ($cartItem) {
-            $cartItem->quantity += $request->quantity;
+            $newQuantity = $cartItem->quantity + $request->quantity;
+            
+            // Check if new quantity exceeds stock
+            if ($newQuantity > $product->stock) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot add more items. Total would exceed available stock.'
+                    ], 422);
+                }
+                return redirect()->back()->with('error', 'Cannot add more items. Would exceed available stock.');
+            }
+            
+            $cartItem->quantity = $newQuantity;
             $cartItem->save();
             \Log::info('Cart item updated', ['cart_id' => $cartItem->cart_id, 'new_quantity' => $cartItem->quantity]);
         } else {
@@ -46,11 +72,18 @@ class CartController extends Controller
             \Log::info('Cart item created', ['cart_id' => $cartItem->cart_id, 'quantity' => $cartItem->quantity]);
         }
         
+        // Get updated cart count
+        $cartCount = CartItem::where('user_id', Auth::id())->sum('quantity');
+        
         // If it's a JSON request, return JSON response
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Product added to cart!'
+                'message' => 'Product added to cart!',
+                'data' => [
+                    'cart_count' => $cartCount,
+                    'item' => $cartItem->load('product')
+                ]
             ]);
         }
         

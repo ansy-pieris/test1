@@ -3,10 +3,9 @@
 
 @section('content')
 <div class="bg-black text-white min-h-screen px-6 lg:px-20 pt-24 pb-16">
-    {{-- Top section: image + heading --}}
-    <div class="flex flex-col lg:flex-row items-center justify-center gap-10 mb-16">
-        <img src="{{ asset('images/faq.png') }}" alt="FAQ" class="w-40 h-40 object-contain">
-        <h1 class="text-5xl font-bold text-center lg:text-left">Frequently Asked Questions</h1>
+    {{-- Top section: heading only --}}
+    <div class="text-center mb-16">
+        <h1 class="text-5xl font-bold">Frequently Asked Questions</h1>
     </div>
 
     {{-- FAQ Content --}}
