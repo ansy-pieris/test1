@@ -190,8 +190,27 @@ class CheckoutPage extends Component
 
         } catch (\Exception $e) {
             DB::rollback();
-            session()->flash('error', 'Something went wrong. Please try again.');
-            \Log::error('Order placement failed: ' . $e->getMessage());
+            
+            // Provide more specific error messages
+            $errorMessage = 'Something went wrong. Please try again.';
+            
+            if (str_contains($e->getMessage(), 'Insufficient stock')) {
+                $errorMessage = $e->getMessage();
+            } elseif (str_contains($e->getMessage(), 'Duplicate entry') || str_contains($e->getMessage(), 'Integrity constraint violation')) {
+                $errorMessage = 'Order processing error. Please try again.';
+            } elseif (str_contains($e->getMessage(), 'Connection refused') || str_contains($e->getMessage(), 'Connection timed out')) {
+                $errorMessage = 'Database connection error. Please try again.';
+            }
+            
+            session()->flash('error', $errorMessage);
+            \Log::error('Order placement failed: ' . $e->getMessage(), [
+                'user_id' => Auth::id(),
+                'cart_items_count' => count($this->items),
+                'total' => $this->total
+            ]);
+            
+            // Don't redirect on error, stay on checkout page
+            return;
         }
     }
 

@@ -24,6 +24,9 @@ class CartCounter extends Component
 
         \Log::info('CartCounter refreshed', ['count' => $this->count, 'user_id' => auth()->id()]);
         
+        // Force component re-render
+        $this->render();
+        
         // Dispatch browser event to update Alpine.js
         $this->dispatch('cart-count-updated', count: $this->count);
     }

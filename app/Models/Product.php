@@ -76,8 +76,13 @@ class Product extends Model
             }
         }
         
-        // Fallback to placeholder image
-        return asset('images/placeholder.jpg');
+        // Fallback to placeholder image - use logo as last resort
+        if (file_exists(public_path('images/placeholder.jpg'))) {
+            return asset('images/placeholder.jpg');
+        }
+        
+        // Ultimate fallback - use logo
+        return asset('images/logo.png');
     }
 
     /**
