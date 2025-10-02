@@ -4,7 +4,10 @@
 @section('content')
 <!-- Hero Section -->
 <section class="relative bg-gray-900 text-white">
-  <img src="{{ asset('images/hero3.webp') }}" alt="About ARES" class="w-full h-96 object-cover opacity-50">
+  <img src="{{ asset('images/hero3.webp') }}" 
+       alt="About ARES" 
+       class="w-full h-96 object-cover opacity-50"
+       onerror="this.onerror=null; this.src='{{ asset('images/placeholder.jpg') }}';"
   <div class="absolute inset-0 flex items-center justify-center">
     <div class="text-center px-4">
       <h1 class="text-4xl font-bold mb-2">Welcome to ARES</h1>

@@ -24,8 +24,6 @@
   @stack('styles')
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col">
-  @include('partials.navbars.navbar-customer')
-
   {{-- Role-specific navbars --}}
   @auth
       @if(auth()->user()->isAdmin())
