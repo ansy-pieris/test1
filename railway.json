@@ -1,0 +1,25 @@
+{
+  "build": {
+    "dockerfilePath": "./.railway/dockerfile"
+  },
+  "deploy": {
+    "startCommand": "apache2-foreground"
+  },
+  "variables": [
+    "APP_KEY",
+    "APP_ENV",
+    "APP_DEBUG",
+    "APP_URL",
+    "DB_CONNECTION",
+    "DB_HOST",
+    "DB_PORT",
+    "DB_DATABASE",
+    "DB_USERNAME",
+    "DB_PASSWORD",
+    "MONGO_DB",
+    "MONGO_HOST",
+    "MONGO_PORT",
+    "MONGO_USER",
+    "MONGO_PASSWORD"
+  ]
+}
